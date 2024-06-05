@@ -7,5 +7,5 @@ int main(int argc, char *argv[])
   write(1, "Hello World! SHALOM BDIKA\n", sizeof("Hello World! SHALOM BDIKA\n"));
 
 
-  exit(0);
+  exit(0,0);
 }
