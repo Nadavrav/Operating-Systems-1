@@ -94,7 +94,9 @@ runcmd(struct cmd *cmd)
     lcmd = (struct listcmd*)cmd;
     if(fork1() == 0)
       runcmd(lcmd->left);
-    wait(0);
+    char buffer1[32];
+    wait(0,buffer1);
+    printf("\n%s\n", buffer1);
     runcmd(lcmd->right);
     break;
 
@@ -118,8 +120,12 @@ runcmd(struct cmd *cmd)
     }
     close(p[0]);
     close(p[1]);
-    wait(0);
-    wait(0);
+    char buffer2[32];
+    wait(0,buffer2);
+    printf("\n%s\n", buffer2);
+    char buffer3[32];
+    wait(0,buffer3);
+    printf("\n%s\n", buffer3);
     break;
 
   case BACK:
@@ -167,7 +173,9 @@ main(void)
     }
     if(fork1() == 0)
       runcmd(parsecmd(buf));
-    wait(0);
+    char buffer4[32];
+    wait(0,buffer4);
+    printf("\n%s\n", buffer4);
   }
   exit(0,0);
 }
