@@ -1,7 +1,9 @@
-#include kernel/types.h
-#include user/user.h
+#include "kernel/types.h"
+#include "user/user.h"
 
-int main(int argc,char **argv){
+int
+main(int argc,char *argv[]){
+    
     //(a) Print how many bytes of memory the running process is using by calling memsize().
     int memory_size = memsize();
     printf("memory size is: %d\n",memory_size);
@@ -20,7 +22,8 @@ int main(int argc,char **argv){
     int new_memory_size2 = memsize();
     printf("new memory size after free is: %d\n",new_memory_size2);
 
-    exit(0,0);
-
-
+    exit(0);
+    
+ 
+    
 }
