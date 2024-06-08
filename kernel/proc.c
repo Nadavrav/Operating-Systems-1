@@ -60,6 +60,7 @@ procinit(void)
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
       p->affinity_mask = 0;
+      p->effective_affinity_mask = 0;
   }
 }
 
@@ -130,6 +131,7 @@ found:
   p->pid = allocpid();
   p->state = USED;
   p->affinity_mask = 0;
+  p->effective_affinity_mask = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -306,6 +308,7 @@ fork(void)
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
   np->affinity_mask = p->affinity_mask;
+  np->effective_affinity_mask = p->affinity_mask;
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
@@ -468,12 +471,17 @@ scheduler(void)
 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if(p->state == RUNNABLE && (!p->affinity_mask)) {
+      if(p->state == RUNNABLE && ( ((p->effective_affinity_mask >> c_id) & 1) || !p->affinity_mask)) {
         
         printf("Process ID: %d , CPU ID: %d\n", p->pid, c_id);
         if(p->affinity_mask){
           int cpu_bit = 1 << c_id;
-          cpu_bit = ~cpu_bit; // Bitwise Not
+          cpu_bit = ~cpu_bit;
+          
+          p->effective_affinity_mask &= cpu_bit;
+
+          if(!p->effective_affinity_mask)
+            p->effective_affinity_mask = p->affinity_mask;
         }
 
 
@@ -708,4 +716,5 @@ void
 set_affinity_mask(int cpus){
     struct proc *p = myproc();
     p->affinity_mask = cpus;
+    p->effective_affinity_mask = cpus;
 }
