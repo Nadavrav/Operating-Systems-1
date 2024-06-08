@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {
-  write(1, "Hello World! SHALOM BDIKA\n", sizeof("Hello World! SHALOM BDIKA\n"));
+  write(1, "Hello World xv6\n", sizeof("Hello World xv6\n"));
 
 
   exit(0,0);
