@@ -26,6 +26,10 @@ extern char trampoline[]; // trampoline.S
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
+
+
+
+
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
@@ -55,6 +59,7 @@ procinit(void)
       initlock(&p->lock, "proc");
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
+      p->affinity_mask = 0;
   }
 }
 
@@ -124,6 +129,7 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  p->affinity_mask = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -169,6 +175,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->affinity_mask = 0;
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -298,6 +305,7 @@ fork(void)
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
+  np->affinity_mask = p->affinity_mask;
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
@@ -352,7 +360,7 @@ exit(int status, char *exit_msg)
     panic("init exiting");
 
   strncpy(p->exit_msg,exit_msg,32);
-
+  
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){
     if(p->ofile[fd]){
@@ -451,6 +459,7 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
+  int c_id = cpuid();
   
   c->proc = 0;
   for(;;){
@@ -459,7 +468,15 @@ scheduler(void)
 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
+      if(p->state == RUNNABLE && (!p->affinity_mask)) {
+        
+        printf("Process ID: %d , CPU ID: %d\n", p->pid, c_id);
+        if(p->affinity_mask){
+          int cpu_bit = 1 << c_id;
+          cpu_bit = ~cpu_bit; // Bitwise Not
+        }
+
+
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
@@ -685,4 +702,10 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+void 
+set_affinity_mask(int cpus){
+    struct proc *p = myproc();
+    p->affinity_mask = cpus;
 }

@@ -10,9 +10,24 @@ uint64
 sys_exit(void)
 {
   int n;
+  char exit_message[32];
   argint(0, &n);
-  exit(n,0);
-  return 0;  // not reached
+  uint64 p;
+  argaddr(1, &p);
+
+  if(p == 0)
+  {
+    strncpy(exit_message, "No exit message",32);
+  }
+
+  else
+  {
+    argstr(1, exit_message, 32);
+  }
+
+
+  exit(n,exit_message);
+  return 0;
 }
 
 uint64
@@ -31,8 +46,10 @@ uint64
 sys_wait(void)
 {
   uint64 p;
+  uint64 message;
   argaddr(0, &p);
-  return wait(p,0);
+  argaddr(1, &message);
+  return wait(p, message);
 }
 
 uint64
@@ -94,4 +111,13 @@ uint64
 sys_memsize(void)
 {
   return myproc()->sz;
+}
+
+uint64
+sys_set_affinity_mask(void)
+{
+  int p;
+  argint(0, &p);
+  set_affinity_mask(p);
+  return 0;
 }
