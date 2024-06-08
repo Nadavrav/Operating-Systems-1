@@ -106,5 +106,4 @@ struct proc {
   char name[16];               // Process name (debugging)
   char exit_msg[32];           // Exit message task 3
   int affinity_mask;           // Each bit represents a CPU
-  int effective_affinity_mask; // Each bit represents a CPU
 };
