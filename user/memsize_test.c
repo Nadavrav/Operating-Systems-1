@@ -20,9 +20,9 @@ main(int argc,char *argv[]){
 
     //(e) Print how many bytes of memory the running process is using after the release.
     int new_memory_size2 = memsize();
-    printf("new memory size after free is: %d\n",new_memory_size2);
-
-    exit(0);
+    printf("new memory size Wafter free is: %d\n",new_memory_size2);
+    exit(0,0);
+    
     
  
     
